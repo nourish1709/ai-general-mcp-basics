@@ -24,7 +24,17 @@ async def main():
     # 5. Create list with messages and add there SYSTEM_PROMPT with instructions to LLM
     # 6. Add to messages Prompts from MCP server as User messages
     # 7. Create console chat (infinite loop + ability to exit from chat + preserve message history after the call to OpenAIClient client)
-    raise NotImplementedError()
+    async with MCPClient('http://localhost:8005/mcp') as mcp_client:
+        resources = mcp_client.get_resources()
+        print(f'Available MCP resources: \n{json.dumps(resources, indent=4)}')
+        tools = mcp_client.get_tools()
+        print(f'Available MCP tools: \n{json.dumps(tools, indent=4)}')
+        openai_client = OpenAIClient(os.getenv('OPENAI_API_KEY'), 'gpt-5-nano', tools, mcp_client)
+        messages: list[Message] = [Message(role = Role.SYSTEM, content = SYSTEM_PROMPT)]
+
+        mcp_prompts: list[Prompt]= mcp_client.get_prompts()
+        # todo: finish the method
+        # [Message(role=Role.USER, content=prompt.content) for prompt in mcp_prompts)]
 
 
 if __name__ == "__main__":

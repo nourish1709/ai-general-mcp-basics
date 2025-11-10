@@ -85,4 +85,8 @@ class OpenAIClient:
         # 2. Get tool name and tool arguments (arguments is a JSON, don't forget about that)
         # 3. Wrap into try/except block and call mcp_client tool call. If succeed then add tool message (don't forget
         #    about tool call id), otherwise add tool message with error message (it kind of fallback strategy).
-        raise NotImplementedError()
+        for tool in self.tools:
+            return None
+            # try:
+            #     tool_name =
+            #     self.mcp_client.call_tool()
