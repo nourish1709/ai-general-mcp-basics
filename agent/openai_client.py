@@ -37,7 +37,7 @@ class OpenAIClient:
                 "model": self.model,
                 "messages": [msg.to_dict() for msg in messages],
                 "tools": self.tools,
-                "temperature": 0.0,
+                # "temperature": 0.0,
                 "stream": True
             }
         )
@@ -85,8 +85,15 @@ class OpenAIClient:
         # 2. Get tool name and tool arguments (arguments is a JSON, don't forget about that)
         # 3. Wrap into try/except block and call mcp_client tool call. If succeed then add tool message (don't forget
         #    about tool call id), otherwise add tool message with error message (it kind of fallback strategy).
-        for tool in self.tools:
-            return None
-            # try:
-            #     tool_name =
-            #     self.mcp_client.call_tool()
+        for tool_call in ai_message.tool_calls:
+            tool_call_id = tool_call.get('id', '')
+            tool_function = tool_call.get('function', {})
+            tool_name = tool_function.get('name', '')
+            tool_arguments = json.loads(tool_function.get('arguments', ''))
+            try:
+                tool_result = await self.mcp_client.call_tool(tool_name, tool_arguments)
+                if tool_result:
+                    messages.append(Message(role=Role.TOOL, content=tool_result, tool_call_id=tool_call_id))
+            except Exception as e:
+                print(f'Exception while calling a tool {tool_name}', e)
+                messages.append(Message(role=Role.TOOL, content=str(e), tool_call_id=tool_call_id))

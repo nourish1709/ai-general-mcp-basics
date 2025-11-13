@@ -26,7 +26,7 @@ class MCPClient:
         # 5. Call `self.session.initialize()`, and print its result (to check capabilities of MCP server later)
         # 6. return self
         self._streams_context = streamablehttp_client(self.mcp_server_url)
-        read_stream, write_stream = await self._streams_context.__aenter__()
+        read_stream, write_stream, _ = await self._streams_context.__aenter__()
         self._session_context = ClientSession(read_stream, write_stream)
         self.session = await self._session_context.__aenter__()
         init_result = await self.session.initialize()
@@ -52,8 +52,19 @@ class MCPClient:
         # 2. Return list with dicts with tool schemas. It should be provided according to OpenAI specification
         # https://platform.openai.com/docs/guides/function-calling#defining-functions
         tools_list = await self.session.list_tools()
-        # todo: finish this method
-        result = [tool.model_dump_json() for tool in tools_list.tools]
+
+        result = []
+        for tool in tools_list.tools:
+            function = {
+                'type': 'function',
+                'function': {
+                    'name': tool.name,
+                    'description': tool.description,
+                    'parameters': tool.inputSchema
+                }
+            }
+            result.append(function)
+
         return result
 
     async def call_tool(self, tool_name: str, tool_args: dict[str, Any]) -> Any:

@@ -50,7 +50,7 @@ async def search_user(
         email: Optional[str] = None,
         gender: Optional[str] = None,
 ):
-   return user_client.search_users(name, surname, email, gender)
+   return await user_client.search_users(name, surname, email, gender)
 
 # 4. `add_user`:-
 @mcp.tool(
